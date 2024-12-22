@@ -1,0 +1,29 @@
+# Node modules
+/node_modules/
+
+# Build directories
+/android/build/
+/ios/build/
+
+# React Native packager
+/.expo/
+/.expo/
+
+# Debugging
+/debug/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDEs
+.idea/
+/.vscode/
+
+# Mac system files
+.DS_Store
+
+# Generated file
+package-lock.json
+yarn.lock
