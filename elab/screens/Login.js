@@ -9,9 +9,9 @@ const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Admin bilgilerini burada tanımlayın
-  const adminEmail = 'b201210045@gmail.com';
-  const adminPassword = '123456789'; // Şifreyi doğrudan buraya gömüyorsunuz
+  // Sabit admin bilgileri
+  const ADMIN_EMAIL = 'b201210045@gmail.com';
+  const ADMIN_PASSWORD = '123456789';
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -19,10 +19,10 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    // Admin girişini kontrol et
-    if (email === adminEmail && password === adminPassword) {
+    // Admin giriş kontrolü
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       Alert.alert('Başarılı', 'Admin olarak giriş yapıldı!');
-      navigation.navigate('AdminPanel');
+      navigation.navigate('AdminPanelNavigator'); // Admin paneline yönlendirme
       return;
     }
 
@@ -33,13 +33,12 @@ const Login = ({ navigation }) => {
 
       // Firestore'dan kullanıcı bilgilerini al
       const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-
       if (userDoc.exists()) {
         const userData = userDoc.data();
 
         if (userData.role === 'user') {
           Alert.alert('Başarılı', 'Kullanıcı olarak giriş yapıldı!');
-          navigation.navigate('UserPanel');
+          navigation.navigate('UserPanelNavigator'); // Kullanıcı paneline yönlendirme
         } else {
           Alert.alert('Hata', 'Kullanıcı rolü tanımlanamıyor.');
         }
@@ -65,11 +64,8 @@ const Login = ({ navigation }) => {
         placeholder="example@gmail.com"
         autoCapitalize="none"
         theme={{
-          fonts: { regular: { fontFamily: 'fantasy' } }, // Placeholder ve yazı fontu
-          colors: {
-            placeholder: '#B71C1C', // Placeholder yazı rengi
-            primary: '#B71C1C', // Odaklanıldığında çerçeve kırmızı
-          },
+          fonts: { regular: { fontFamily: 'fantasy' } },
+          colors: { placeholder: '#B71C1C', primary: '#B71C1C' },
         }}
       />
       <TextInput
@@ -82,10 +78,7 @@ const Login = ({ navigation }) => {
         placeholder="********"
         theme={{
           fonts: { regular: { fontFamily: 'fantasy' } },
-          colors: {
-            placeholder: '#B71C1C', // Placeholder yazı rengi
-            primary: '#B71C1C', // Odaklanıldığında çerçeve kırmızı
-          },
+          colors: { placeholder: '#B71C1C', primary: '#B71C1C' },
         }}
       />
       <Button
@@ -97,14 +90,6 @@ const Login = ({ navigation }) => {
       >
         Giriş Yap
       </Button>
-      <Button
-        mode="text"
-        onPress={() => navigation.navigate('Signup')}
-        style={styles.linkButton}
-        labelStyle={styles.linkButtonText}
-      >
-        Henüz bir hesabınız yok mu? Kayıt Ol
-      </Button>
     </View>
   );
 };
@@ -114,19 +99,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#80CBC4',
     padding: 20,
-    backgroundColor: '#80CBC4', // Açık zümrüt yeşili arka plan
   },
   avatar: {
-    backgroundColor: '#B71C1C', // Kırmızı avatar rengi
+    backgroundColor: '#B71C1C',
     marginBottom: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 30,
-    color: '#00796B', // Koyu zümrüt yeşili başlık
-    fontFamily: 'fantasy', // Yazı fontu
+    color: '#00796B',
   },
   input: {
     width: '100%',
@@ -136,7 +120,7 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     marginTop: 10,
-    backgroundColor: '#00796B', // Koyu zümrüt yeşili buton
+    backgroundColor: '#00796B',
   },
   buttonContent: {
     height: 50,
@@ -144,15 +128,6 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'fantasy', // Yazı fontu
-  },
-  linkButton: {
-    marginTop: 20,
-  },
-  linkButtonText: {
-    color: '#B71C1C', // Kırmızı link rengi
-    fontWeight: 'bold',
-    fontFamily: 'fantasy', // Yazı fontu
   },
 });
 
