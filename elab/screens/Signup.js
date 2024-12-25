@@ -84,7 +84,7 @@ const Signup = ({ navigation }) => {
         style={styles.linkButton}
         labelStyle={styles.linkButtonText}
       >
-        Zaten bir hesabın var mı? Giriş Yap
+        Zaten bir hesabın var mı? Giriş Yap p
       </Button>
     </View>
   );
