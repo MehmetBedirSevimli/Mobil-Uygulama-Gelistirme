@@ -7,6 +7,12 @@ const sampleReports = [
   { id: '1', name: 'Kan Testi', date: '2024-12-20', status: 'düşük' },
   { id: '2', name: 'Şeker Testi', date: '2024-12-15', status: 'normal' },
   { id: '3', name: 'Kolesterol Testi', date: '2024-12-10', status: 'yüksek' },
+  { id: '4', name: 'Kan Testi', date: '2024-12-20', status: 'düşük' },
+  { id: '5', name: 'Şeker Testi', date: '2024-12-15', status: 'normal' },
+  { id: '6', name: 'Kolesterol Testi', date: '2024-12-10', status: 'yüksek' },
+  { id: '7', name: 'Kan Testi', date: '2024-12-20', status: 'düşük' },
+  { id: '8', name: 'Şeker Testi', date: '2024-12-15', status: 'normal' },
+  { id: '9', name: 'Kolesterol Testi', date: '2024-12-10', status: 'yüksek' },
 ];
 
 const PastReports = () => {
