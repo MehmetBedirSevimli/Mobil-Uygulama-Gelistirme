@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 15,
+    width:200,
     backgroundColor: '#fff',
     fontFamily: 'fantasy',
   },
