@@ -1,54 +1,83 @@
-import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { auth, firestore } from '../firebase';
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Alert } from 'react-native';
 import { Text, Card, Avatar } from 'react-native-paper';
 
-// Örnek tahlil verileri
-const sampleReports = [
-  { id: '1', name: 'Kan Testi', date: '2024-12-20', status: 'düşük' },
-  { id: '2', name: 'Şeker Testi', date: '2024-12-15', status: 'normal' },
-  { id: '3', name: 'Kolesterol Testi', date: '2024-12-10', status: 'yüksek' },
-  { id: '4', name: 'Kan Testi', date: '2024-12-20', status: 'düşük' },
-  { id: '5', name: 'Şeker Testi', date: '2024-12-15', status: 'normal' },
-  { id: '6', name: 'Kolesterol Testi', date: '2024-12-10', status: 'yüksek' },
-  { id: '7', name: 'Kan Testi', date: '2024-12-20', status: 'düşük' },
-  { id: '8', name: 'Şeker Testi', date: '2024-12-15', status: 'normal' },
-  { id: '9', name: 'Kolesterol Testi', date: '2024-12-10', status: 'yüksek' },
-];
-
 const PastReports = () => {
-  // Tahlil durumlarına göre renk seçimi
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'düşük':
-        return '#00796B'; // Koyu zümrüt yeşili
-      case 'normal':
-        return '#80CBC4'; // Açık zümrüt yeşili
-      case 'yüksek':
-        return '#B71C1C'; // Kırmızı
-      default:
-        return '#9e9e9e'; // Varsayılan gri
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchPatientReports();
+  }, []);
+
+  const fetchPatientReports = async () => {
+    setLoading(true);
+    try {
+      // Giriş yapan kullanıcının e-posta adresini al
+      const userEmail = auth.currentUser?.email;
+      if (!userEmail) {
+        Alert.alert('Hata', 'Oturum açmış bir kullanıcı bulunamadı.');
+        setLoading(false);
+        return;
+      }
+
+      // Hastanın e-posta adresine göre hasta bilgilerini al
+      const patientsRef = collection(firestore, 'patients');
+      const q = query(patientsRef, where('email', '==', userEmail));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        Alert.alert('Hata', 'E-posta adresinizle eşleşen bir hasta bulunamadı.');
+        setLoading(false);
+        return;
+      }
+
+      // Hasta numarasını al
+      const patientData = querySnapshot.docs[0].data();
+      const patientNumber = patientData.patientNumber;
+
+      // Hasta numarasına bağlı tahlilleri getir
+      const reportsRef = collection(firestore, 'patients', patientNumber, 'reports');
+      const reportsQuery = query(reportsRef, orderBy('date', 'desc'));
+      const reportsSnapshot = await getDocs(reportsQuery);
+
+      const reportsList = reportsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setReports(reportsList);
+    } catch (error) {
+      console.error('Hata:', error.message);
+      Alert.alert('Hata', 'Tahlil bilgileri alınırken bir sorun oluştu.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const renderReport = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title
-        title={item.name}
-        subtitle={`Tarih: ${item.date}`}
+        title={`Tarih: ${new Date(item.date).toLocaleDateString()}`}
+        subtitle={`Durum: ${item.status || 'Bilinmiyor'}`}
         left={(props) => (
           <Avatar.Icon
             {...props}
             icon="file-document"
-            style={[styles.avatar, { backgroundColor: getStatusColor(item.status) }]}
+            style={styles.avatar}
           />
         )}
-        titleStyle={styles.cardTitle}
-        subtitleStyle={styles.cardSubtitle}
       />
       <Card.Content>
-        <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
-          Durum: {item.status.toUpperCase()}
-        </Text>
+        <Text>IgA: {item.IgA ?? 'Boş'}</Text>
+        <Text>IgM: {item.IgM ?? 'Boş'}</Text>
+        <Text>IgG: {item.IgG ?? 'Boş'}</Text>
+        <Text>IgG1: {item.IgG1 ?? 'Boş'}</Text>
+        <Text>IgG2: {item.IgG2 ?? 'Boş'}</Text>
+        <Text>IgG3: {item.IgG3 ?? 'Boş'}</Text>
+        <Text>IgG4: {item.IgG4 ?? 'Boş'}</Text>
       </Card.Content>
     </Card>
   );
@@ -56,12 +85,16 @@ const PastReports = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Geçmiş Tahliller</Text>
-      <FlatList
-        data={sampleReports}
-        renderItem={renderReport}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-      />
+      {loading ? (
+        <Text>Yükleniyor...</Text>
+      ) : (
+        <FlatList
+          data={reports}
+          renderItem={renderReport}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+        />
+      )}
     </View>
   );
 };
@@ -70,13 +103,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#80CBC4', // Açık zümrüt yeşili arka plan
+    backgroundColor: '#80CBC4',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#00796B', // Koyu zümrüt yeşili başlık
-    fontFamily: 'fantasy', // Yazı fontu
+    color: '#00796B',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -86,26 +118,9 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 15,
     borderRadius: 10,
-    elevation: 4, // Gölgeler için
   },
   avatar: {
-    backgroundColor: '#00796B', // Varsayılan avatar rengi
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: 'fantasy', // Yazı fontu
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#9e9e9e', // Gri alt başlık
-    fontFamily: 'fantasy', // Yazı fontu
-  },
-  status: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
-    fontFamily: 'fantasy', // Yazı fontu
+    backgroundColor: '#00796B',
   },
 });
 
