@@ -38,6 +38,16 @@ const AdminPanel = ({ navigation }) => {
         Tahlil Listele
       </Button>
 
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('Diagnosis')}
+        style={styles.button}
+        contentStyle={styles.buttonContent}
+        labelStyle={styles.buttonText}
+      >
+        Tanı Koy
+      </Button>
+
     </View>
   );
 };

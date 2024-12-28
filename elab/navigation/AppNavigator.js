@@ -12,6 +12,8 @@ import Profile from '../screens/Profile';
 import AddPatient from '../screens/AddPatient';
 import AddReport from '../screens/AddReport';
 import ListReport from '../screens/ListReport';
+import Diagnosis from '../screens/Diagnosis';
+
 
 
 const Stack = createNativeStackNavigator();
@@ -69,6 +71,11 @@ const AdminPanelNavigator = () => {
         name="ListReport" 
         component={ListReport} 
         options={{ title: 'Tahlil Listele' }} 
+      />
+      <AdminStack.Screen 
+        name="Diagnosis" 
+        component={Diagnosis} 
+        options={{ title: 'Tanı Koy' }} 
       />
     </AdminStack.Navigator>
   );
