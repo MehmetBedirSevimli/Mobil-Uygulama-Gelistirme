@@ -217,36 +217,53 @@ const AddGuide = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#80CBC4", // Sayfa arka plan rengi
   },
   scrollContent: {
     padding: 20,
   },
   avatar: {
-    backgroundColor: "#B71C1C",
+    backgroundColor: "#B71C1C", // Avatar arka plan rengi
     marginBottom: 20,
+    alignSelf: "center", // Avatarı ortalamak için
   },
   input: {
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#fff", // Form alanı arka planı
   },
   card: {
     marginBottom: 20,
     padding: 10,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "#fff", // Kart arka planı
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "#B71C1C", // Kart kenar rengi
     borderRadius: 5,
   },
   igHeader: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#00796B",
+    color: "#00796B", // Başlık rengi
+    textAlign: "center", // Başlığı ortalamak için
   },
   button: {
-    backgroundColor: "#00796B",
+    backgroundColor: "#00796B", // Buton rengi
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#fff", // Buton metin rengi
+    textAlign: "center",
   },
 });
+
 
 export default AddGuide;
 
