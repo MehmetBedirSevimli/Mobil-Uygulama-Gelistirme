@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Text,
 } from "react-native";
 import { TextInput, Button, Avatar } from "react-native-paper";
 import { collection, doc, setDoc } from "firebase/firestore";
@@ -13,26 +14,33 @@ import { firestore } from "../firebase";
 
 const AddGuide = () => {
   const [guideName, setGuideName] = useState(""); // Kılavuz adı
+  const initialIgValues = {
+    maxGeoMean: "",
+    max: "",
+    maxConfidence: "",
+    maxMean: "",
+    min: "",
+    minConfidence: "",
+    minGeoMean: "",
+    minMean: "",
+    yasMax: "",
+    yasMin: "",
+    cinsiyet: "",
+  };
   const [igValues, setIgValues] = useState({
-    IgA: {
-      maxGeoMean: "",
-      max: "",
-      maxConfidence: "",
-      maxMean: "",
-      min: "",
-      minConfidence: "",
-      minGeoMean: "",
-      minMean: "",
-      yasMax: "",
-      yasMin: "",
-      cinsiyet: "",
-    },
+    IgA: { ...initialIgValues },
+    IgM: { ...initialIgValues },
+    IgG: { ...initialIgValues },
+    IgG1: { ...initialIgValues },
+    IgG2: { ...initialIgValues },
+    IgG3: { ...initialIgValues },
+    IgG4: { ...initialIgValues },
   });
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (igKey, field, value) => {
     setIgValues((prevState) => ({
       ...prevState,
-      IgA: { ...prevState.IgA, [field]: value },
+      [igKey]: { ...prevState[igKey], [field]: value },
     }));
   };
 
@@ -44,21 +52,17 @@ const AddGuide = () => {
 
     const guideData = {
       name: guideName.trim(),
-      values: {
-        IgA: {
-          maxGeoMean: Number(igValues.IgA.maxGeoMean) || null,
-          max: Number(igValues.IgA.max) || null,
-          maxConfidence: Number(igValues.IgA.maxConfidence) || null,
-          maxMean: Number(igValues.IgA.maxMean) || null,
-          min: Number(igValues.IgA.min) || null,
-          minConfidence: Number(igValues.IgA.minConfidence) || null,
-          minGeoMean: Number(igValues.IgA.minGeoMean) || null,
-          minMean: Number(igValues.IgA.minMean) || null,
-          yasMax: Number(igValues.IgA.yasMax) || null,
-          yasMin: Number(igValues.IgA.yasMin) || null,
-          cinsiyet: igValues.IgA.cinsiyet || "Her İkisi",
-        },
-      },
+      values: Object.fromEntries(
+        Object.entries(igValues).map(([key, values]) => [
+          key,
+          Object.fromEntries(
+            Object.entries(values).map(([field, value]) => [
+              field,
+              value === "" ? null : Number(value) || value,
+            ])
+          ),
+        ])
+      ),
     };
 
     console.log("Guide Data to Firestore:", guideData);
@@ -71,19 +75,13 @@ const AddGuide = () => {
       Alert.alert("Başarılı", "Kılavuz başarıyla kaydedildi.");
       setGuideName(""); // Form sıfırlama
       setIgValues({
-        IgA: {
-          maxGeoMean: "",
-          max: "",
-          maxConfidence: "",
-          maxMean: "",
-          min: "",
-          minConfidence: "",
-          minGeoMean: "",
-          minMean: "",
-          yasMax: "",
-          yasMin: "",
-          cinsiyet: "",
-        },
+        IgA: { ...initialIgValues },
+        IgM: { ...initialIgValues },
+        IgG: { ...initialIgValues },
+        IgG1: { ...initialIgValues },
+        IgG2: { ...initialIgValues },
+        IgG3: { ...initialIgValues },
+        IgG4: { ...initialIgValues },
       });
     } catch (error) {
       console.error("Hata:", error.message);
@@ -108,17 +106,106 @@ const AddGuide = () => {
           onChangeText={setGuideName}
           style={styles.input}
         />
-        <View style={styles.card}>
+        {Object.keys(igValues).map((igKey) => (
+          <View key={igKey} style={styles.card}>
+            <Text style={styles.igHeader}>{igKey}</Text>
+            <TextInput
+              mode="outlined"
+              label="Yas Min"
+              value={igValues[igKey].yasMin}
+              onChangeText={(value) => handleInputChange(igKey, "yasMin", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            
+            <TextInput
+              mode="outlined"
+              label="Yas Max"
+              value={igValues[igKey].yasMax}
+              onChangeText={(value) => handleInputChange(igKey, "yasMax", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Min GeoMean"
+              value={igValues[igKey].minGeoMean}
+              onChangeText={(value) => handleInputChange(igKey, "minGeoMean", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Max GeoMean"
+              value={igValues[igKey].maxGeoMean}
+              onChangeText={(value) => handleInputChange(igKey, "maxGeoMean", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+             
+            <TextInput
+              mode="outlined"
+              label="Min Mean"
+              value={igValues[igKey].minMean}
+              onChangeText={(value) => handleInputChange(igKey, "minMean", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Max Mean"
+              value={igValues[igKey].maxMean}
+              onChangeText={(value) => handleInputChange(igKey, "maxMean", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Min"
+              value={igValues[igKey].min}
+              onChangeText={(value) => handleInputChange(igKey, "min", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Max"
+              value={igValues[igKey].max}
+              onChangeText={(value) => handleInputChange(igKey, "max", value)}
+              style={styles.input}
+              keyboardType="numeric"
+            />
+           
+           
           <TextInput
-            mode="outlined"
-            label="Max GeoMean"
-            value={igValues.IgA.maxGeoMean}
-            onChangeText={(value) => handleInputChange("maxGeoMean", value)}
-            style={styles.input}
-            keyboardType="numeric"
-          />
-          {/* Diğer alanlar aynı şekilde devam eder */}
-        </View>
+              mode="outlined"
+              label="Min Confidence"
+              value={igValues[igKey].minConfidence}
+              onChangeText={(value) =>
+                handleInputChange(igKey, "minConfidence", value)
+              }
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Max Confidence"
+              value={igValues[igKey].maxConfidence}
+              onChangeText={(value) =>
+                handleInputChange(igKey, "maxConfidence", value)
+              }
+              style={styles.input}
+              keyboardType="numeric"
+            />
+            <TextInput
+              mode="outlined"
+              label="Cinsiyet"
+              value={igValues[igKey].cinsiyet}
+              onChangeText={(value) => handleInputChange(igKey, "cinsiyet", value)}
+              style={styles.input}
+            />
+          </View>
+        ))}
         <Button mode="contained" onPress={handleAddGuide} style={styles.button}>
           Kılavuz Ekle
         </Button>
@@ -150,9 +237,16 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 5,
   },
+  igHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#00796B",
+  },
   button: {
     backgroundColor: "#00796B",
   },
 });
 
 export default AddGuide;
+
