@@ -48,6 +48,16 @@ const AdminPanel = ({ navigation }) => {
         Tanı Koy
       </Button>
 
+      <Button
+        mode="contained"
+        onPress={() => navigation.navigate('AddGuide')}
+        style={styles.button}
+        contentStyle={styles.buttonContent}
+        labelStyle={styles.buttonText}
+      >
+        Kılavuz Ekle
+      </Button>
+
     </View>
   );
 };

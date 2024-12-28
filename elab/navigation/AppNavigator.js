@@ -13,6 +13,7 @@ import AddPatient from '../screens/AddPatient';
 import AddReport from '../screens/AddReport';
 import ListReport from '../screens/ListReport';
 import Diagnosis from '../screens/Diagnosis';
+import AddGuide from '../screens/AddGuide';
 
 
 
@@ -76,6 +77,11 @@ const AdminPanelNavigator = () => {
         name="Diagnosis" 
         component={Diagnosis} 
         options={{ title: 'Tanı Koy' }} 
+      />
+      <AdminStack.Screen 
+        name="AddGuide" 
+        component={AddGuide} 
+        options={{ title: 'Kılavuz Ekle' }} 
       />
     </AdminStack.Navigator>
   );
