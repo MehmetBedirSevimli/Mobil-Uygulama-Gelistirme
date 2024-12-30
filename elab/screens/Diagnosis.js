@@ -77,50 +77,55 @@ const Diagnosis = () => {
       }
 
       const resultsForGuide = [];
+      
       Object.entries(inputValues).forEach(([test, value]) => {
-        if (value === null) {
+        if (value === null || value === undefined) {
           resultsForGuide.push({
             test,
-            value: "Boş",
-            result: "Bilinmiyor",
+            value: "-",
+            result: "-",
             color: "gray",
             range: "",
-            geoOrt: "Eksik",
-            ort: "Eksik",
+            geoOrt: "-",
+            ort: "-",
+            confidence: "-",
           });
           return;
         }
-
+      
         const testReference = selectedAgeGroup[test];
         if (!testReference) {
           resultsForGuide.push({
             test,
             value,
-            result: "Bilinmiyor",
+            result: "-",
             color: "gray",
             range: "",
-            geoOrt: "Eksik",
-            ort: "Eksik",
+            geoOrt: "-",
+            ort: "-",
+            confidence: "-",
           });
           return;
         }
-
-        const { min, max, minGeo, maxGeo, minMean, maxMean } = testReference;
+      
+        const { min, max, minGeo, maxGeo, minMean, maxMean, minConfidence, maxConfidence } = testReference;
         resultsForGuide.push({
           test,
           value,
           result:
             value < min
-              ? "Düşük"
+              ? "D"
               : value > max
-              ? "Yüksek"
-              : "Normal",
+              ? "Y"
+              : "N",
           color: value < min ? "red" : value > max ? "green" : "blue",
-          range: `${min} - ${max}`,
-          geoOrt: `${minGeo || "Eksik"} - ${maxGeo || "Eksik"}`,
-          ort: `${minMean || "Eksik"} - ${maxMean || "Eksik"}`,
+          range: `${min || "-"} - ${max || "-"}`,
+          geoOrt: `${minGeo || "-"} - ${maxGeo || "-"}`,
+          ort: `${minMean || "-"} - ${maxMean || "-"}`,
+          confidence: `${minConfidence || "-"} - ${maxConfidence || "-"}`,
         });
       });
+      
 
       diagnosisResults.push({
         guideName: guide.name,
@@ -166,30 +171,48 @@ const Diagnosis = () => {
             {guideResult.message ? (
               <Text style={styles.errorMessage}>{guideResult.message}</Text>
             ) : (
+              <ScrollView horizontal>
               <DataTable>
                 <DataTable.Header>
-                  <DataTable.Title>Tahlil</DataTable.Title>
-                  <DataTable.Title numeric>Değer</DataTable.Title>
-                  <DataTable.Title numeric>Sonuç</DataTable.Title>
-                  <DataTable.Title numeric>Referans</DataTable.Title>
-                  <DataTable.Title numeric>GeoOrt</DataTable.Title>
-                  <DataTable.Title numeric>Ort</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 50 }}>Tahlil</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 50 }} numeric>Değer</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 50 }} numeric>Sonuç</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 100 }} numeric>Referans</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 100 }} numeric>GeoOrt</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 100 }} numeric>Ort</DataTable.Title>
+                  <DataTable.Title style={{ minWidth: 100 }} numeric>%95 Con</DataTable.Title>
                 </DataTable.Header>
                 {guideResult.results.map(
-                  ({ test, value, result, color, range, geoOrt, ort }, index) => (
+                  ({ test, value, result, color, range, geoOrt, ort, confidence }, index) => (
                     <DataTable.Row key={index} style={styles.row}>
-                      <DataTable.Cell>{test}</DataTable.Cell>
-                      <DataTable.Cell numeric>{value}</DataTable.Cell>
-                      <DataTable.Cell numeric>
-                        <Text style={{ color }}>{result}</Text>
+                      <DataTable.Cell style={{ minWidth: 50 }}>{test}</DataTable.Cell>
+                      <DataTable.Cell style={{ minWidth: 50 }} numeric>
+                        {value !== null && value !== undefined ? value : "-"}
                       </DataTable.Cell>
-                      <DataTable.Cell numeric>{range}</DataTable.Cell>
-                      <DataTable.Cell numeric>{geoOrt}</DataTable.Cell>
-                      <DataTable.Cell numeric>{ort}</DataTable.Cell>
+                      <DataTable.Cell style={{ minWidth: 50 }} numeric>
+                        <Text style={{ color }}>{result !== null && result !== undefined ? result : "-"}</Text>
+                      </DataTable.Cell>
+                      <DataTable.Cell style={{ minWidth: 100 }} numeric>
+                        {range && range !== "null - null" ? range : "-"}
+                      </DataTable.Cell>
+                      <DataTable.Cell style={{ minWidth: 100 }} numeric>
+                        {geoOrt && geoOrt !== "null - null" ? geoOrt : "-"}
+                      </DataTable.Cell>
+                      <DataTable.Cell style={{ minWidth: 100 }} numeric>
+                        {ort && ort !== "null - null" ? ort : "-"}
+                      </DataTable.Cell>
+                      <DataTable.Cell style={{ minWidth: 100 }} numeric>
+                        {confidence && confidence !== "null - null" ? confidence : "-"}
+                      </DataTable.Cell>
                     </DataTable.Row>
                   )
                 )}
               </DataTable>
+            </ScrollView>
+            
+            
+            
+
             )}
           </View>
         ))}
