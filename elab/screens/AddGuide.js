@@ -22,10 +22,17 @@ const AddGuide = () => {
     maxGeo: "",
     minMean: "",
     maxMean: "",
+    minConfidence: "",
+    maxConfidence: "",
   };
   const [igValues, setIgValues] = useState({
     IgA: { ...initialIgValues },
     IgM: { ...initialIgValues },
+    IgG: { ...initialIgValues },
+    IgG1: { ...initialIgValues },
+    IgG2: { ...initialIgValues },
+    IgG3: { ...initialIgValues },
+    IgG4: { ...initialIgValues },
   });
   const [ageGroups, setAgeGroups] = useState({}); // Tüm yaş gruplarını tutar
 
@@ -103,6 +110,11 @@ const AddGuide = () => {
       setIgValues({
         IgA: { ...initialIgValues },
         IgM: { ...initialIgValues },
+        IgG: { ...initialIgValues },
+        IgG1: { ...initialIgValues },
+        IgG2: { ...initialIgValues },
+        IgG3: { ...initialIgValues },
+        IgG4: { ...initialIgValues },
       });
     } catch (error) {
       console.error("Hata:", error.message);
