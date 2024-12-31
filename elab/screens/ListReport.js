@@ -39,14 +39,13 @@ const ListReport = () => {
 
       setPatientData(patient);
 
-      // Tarihe göre sıralama (büyükten küçüğe)
       const reportsCollection = collection(
         firestore,
         'patients',
         patientNumber,
         'reports'
       );
-      const reportsQuery = query(reportsCollection, orderBy('testRequestTime', 'desc')); // Büyükten küçüğe sıralama
+      const reportsQuery = query(reportsCollection, orderBy('testRequestTime', 'desc'));
       const reportsSnapshot = await getDocs(reportsQuery);
 
       if (reportsSnapshot.empty) {
@@ -62,9 +61,6 @@ const ListReport = () => {
           id: doc.id,
           ...data,
           testRequestTime: data.testRequestTime?.toDate?.() || null,
-          sampleCollectionTime: data.sampleCollectionTime?.toDate?.() || null,
-          sampleAcceptanceTime: data.sampleAcceptanceTime?.toDate?.() || null,
-          expertApprovalTime: data.expertApprovalTime?.toDate?.() || null,
         };
       });
 
@@ -85,39 +81,27 @@ const ListReport = () => {
   };
 
   const renderReportCard = (report, index) => {
-    const nextReport = index < patientReports.length - 1 ? patientReports[index + 1] : null; // Bir sonraki raporu al
+    const nextReport = index < patientReports.length - 1 ? patientReports[index + 1] : null;
 
     return (
       <Card style={styles.card} key={report.id}>
         <Card.Title
           title={`Rapor Tarihi: ${
-            report.testRequestTime ? report.testRequestTime.toLocaleDateString() : 'Boş'
+            report.testRequestTime ? report.testRequestTime.toLocaleDateString() : '-'
           }`}
-          subtitle={`Rapor Grubu: ${report.reportGroup || 'Boş'}`}
+          subtitle={`Rapor Grubu: ${report.reportGroup || '-'}`}
         />
         <Card.Content>
-          <Text>Numune Türü: {report.sampleType}</Text>
-          <Text>
-            Test İstem Zamanı: {report.testRequestTime ? report.testRequestTime.toLocaleString() : 'Boş'}
-          </Text>
-          <Text>
-            Numune Alma Zamanı:{' '}
-            {report.sampleCollectionTime ? report.sampleCollectionTime.toLocaleString() : 'Boş'}
-          </Text>
-          <Text>
-            Numune Kabul Zamanı:{' '}
-            {report.sampleAcceptanceTime ? report.sampleAcceptanceTime.toLocaleString() : 'Boş'}
-          </Text>
-          <Text>
-            Uzman Onay Zamanı:{' '}
-            {report.expertApprovalTime ? report.expertApprovalTime.toLocaleString() : 'Boş'}
-          </Text>
           <ScrollView horizontal>
             <DataTable>
               <DataTable.Header>
-                <DataTable.Title>Tahlil</DataTable.Title>
-                <DataTable.Title numeric>Sonuç</DataTable.Title>
-                <DataTable.Title>Trend</DataTable.Title>
+                <DataTable.Title style={styles.tableHeader}>Tahlil</DataTable.Title>
+                <DataTable.Title style={styles.tableHeader} numeric>
+                  Sonuç
+                </DataTable.Title>
+                <DataTable.Title style={styles.tableHeader} numeric>
+                  Trend
+                </DataTable.Title>
               </DataTable.Header>
               {['IgA', 'IgM', 'IgG', 'IgG1', 'IgG2', 'IgG3', 'IgG4'].map((test) => {
                 const value = report[test];
@@ -126,10 +110,12 @@ const ListReport = () => {
                   nextValue !== undefined && nextValue !== null ? getTrendIcon(value, nextValue) : null;
 
                 return (
-                  <DataTable.Row key={test}>
-                    <DataTable.Cell>{test}</DataTable.Cell>
-                    <DataTable.Cell numeric>{value ?? 'Boş'}</DataTable.Cell>
-                    <DataTable.Cell>
+                  <DataTable.Row key={test} style={styles.tableRow}>
+                    <DataTable.Cell style={styles.tableCell}>{test}</DataTable.Cell>
+                    <DataTable.Cell style={styles.tableCell} numeric>
+                      {value ?? '-'}
+                    </DataTable.Cell>
+                    <DataTable.Cell style={styles.tableCell} numeric>
                       {trend && (
                         <Text style={{ color: trend.color, fontSize: 16, fontWeight: 'bold' }}>
                           {trend.icon}
@@ -237,8 +223,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   card: {
-    marginVertical: 8,
+    marginVertical: 12, // Kartlar arası boşluk
     marginHorizontal: 16,
+    paddingVertical: 10,
     backgroundColor: '#fff',
     borderRadius: 8,
   },
@@ -257,6 +244,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#B71C1C',
     marginTop: 20,
+  },
+  tableHeader: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  tableRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingVertical: 8,
+  },
+  tableCell: {
+    textAlign: 'center',
+    minWidth: 100,
   },
 });
 
