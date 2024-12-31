@@ -40,7 +40,7 @@ const Diagnosis = () => {
       Alert.alert("Hata", "Lütfen yaş değeri girin.");
       return;
     }
-
+  
     const numericAge = parseFloat(age);
     const inputValues = {
       IgA: IgA !== "" ? parseFloat(IgA) : null,
@@ -51,13 +51,13 @@ const Diagnosis = () => {
       IgG3: IgG3 !== "" ? parseFloat(IgG3) : null,
       IgG4: IgG4 !== "" ? parseFloat(IgG4) : null,
     };
-
+  
     const diagnosisResults = [];
-
+  
     guides.forEach((guide) => {
-      let guideResults = [];
       let selectedAgeGroup = null;
-
+  
+      // Yaş grubunu bul
       for (const [ageGroupKey, ageGroupData] of Object.entries(guide.values)) {
         const { minYas, maxYas } = ageGroupData.ageRange || {};
         if (numericAge >= minYas && numericAge <= maxYas) {
@@ -65,7 +65,7 @@ const Diagnosis = () => {
           break;
         }
       }
-
+  
       if (!selectedAgeGroup) {
         diagnosisResults.push({
           guideName: guide.name,
@@ -75,17 +75,18 @@ const Diagnosis = () => {
         });
         return;
       }
-
+  
       const resultsForGuide = [];
-      
+  
+      // Tahlil değerlerini değerlendir
       Object.entries(inputValues).forEach(([test, value]) => {
-        if (value === null || value === undefined) {
+        if (value === null || value === undefined || isNaN(value)) {
           resultsForGuide.push({
             test,
             value: "-",
             result: "-",
             color: "gray",
-            range: "",
+            range: "-",
             geoOrt: "-",
             ort: "-",
             confidence: "-",
@@ -94,13 +95,15 @@ const Diagnosis = () => {
         }
       
         const testReference = selectedAgeGroup[test];
-        if (!testReference) {
+      
+        // Referans aralığı kontrolü
+        if (!testReference || testReference.min === undefined || testReference.max === undefined) {
           resultsForGuide.push({
             test,
             value,
             result: "-",
             color: "gray",
-            range: "",
+            range: "-",
             geoOrt: "-",
             ort: "-",
             confidence: "-",
@@ -109,6 +112,7 @@ const Diagnosis = () => {
         }
       
         const { min, max, minGeo, maxGeo, minMean, maxMean, minConfidence, maxConfidence } = testReference;
+      
         resultsForGuide.push({
           test,
           value,
@@ -126,7 +130,7 @@ const Diagnosis = () => {
         });
       });
       
-
+  
       diagnosisResults.push({
         guideName: guide.name,
         ageRange: `${selectedAgeGroup.ageRange.minYas} - ${selectedAgeGroup.ageRange.maxYas}`,
@@ -134,9 +138,10 @@ const Diagnosis = () => {
         results: resultsForGuide,
       });
     });
-
+  
     setResults(diagnosisResults);
   };
+  
 
   return (
     <Provider>
