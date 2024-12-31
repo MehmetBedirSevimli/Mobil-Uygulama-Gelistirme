@@ -3,34 +3,36 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { Text, TextInput, Button, Avatar, Menu, Divider, Provider } from 'react-native-paper';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { firestore } from '../firebase';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const AddPatient = () => {
   const [patientNumber, setPatientNumber] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [age, setAge] = useState(''); // Yaş durumu
+  const [birthDate, setBirthDate] = useState(null); // Doğum Tarihi
+  const [gender, setGender] = useState(''); // Cinsiyet
   const [menuVisible, setMenuVisible] = useState(false); // Menü görünürlüğü kontrolü
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const ageOptions = [
-    '0-1 Ay',
-    '1-5 Ay',
-    '6-8 Ay',
-    '9-12 Ay',
-    '13-24 Ay',
-    '25-36 Ay',
-    '37-48 Ay',
-    '4-6 Yaş',
-    '6-8 Yaş',
-    '9-10 Yaş',
-    '11-12 Yaş',
-    '13-14 Yaş',
-    '15-16 Yaş',
-    '16+ Yaş',
-  ];
+  const genderOptions = ['Erkek', 'Kadın'];
+
+  const calculateTotalMonths = (birthDate) => {
+    const now = new Date();
+    const birth = new Date(birthDate);
+
+    // Yıl ve ay farkını hesaplarken
+    const yearsDifference = now.getFullYear() - birth.getFullYear();
+    const monthsDifference = now.getMonth() - birth.getMonth();
+
+    // Toplam ayları hesapla
+    const totalMonths = yearsDifference * 12 + monthsDifference;
+
+    return totalMonths;
+  };
 
   const handleAddPatient = async () => {
-    if (!patientNumber || !firstName || !lastName || !email || !age) {
+    if (!patientNumber || !firstName || !lastName || !email || !birthDate || !gender) {
       Alert.alert('Hata', 'Tüm alanları doldurun.');
       return;
     }
@@ -43,12 +45,16 @@ const AddPatient = () => {
         return;
       }
 
+      const totalMonths = calculateTotalMonths(birthDate);
+
       await setDoc(patientDocRef, {
         patientNumber,
         firstName,
         lastName,
         email,
-        age,
+        birthDate: birthDate.toISOString(),
+        gender,
+        age: totalMonths, // Toplam ay olarak kaydediliyor
       });
 
       Alert.alert('Başarılı', 'Hasta bilgileri başarıyla kaydedildi.');
@@ -56,7 +62,8 @@ const AddPatient = () => {
       setFirstName('');
       setLastName('');
       setEmail('');
-      setAge('');
+      setBirthDate(null);
+      setGender('');
     } catch (error) {
       console.error('Hata:', error.message);
       Alert.alert('Hata', 'Hasta bilgileri eklenirken bir sorun oluştu: ' + error.message);
@@ -100,6 +107,24 @@ const AddPatient = () => {
           style={styles.input}
           keyboardType="email-address"
         />
+        <Button
+          mode="outlined"
+          onPress={() => setShowDatePicker(true)}
+          style={styles.input}
+        >
+          {birthDate ? birthDate.toDateString() : 'Doğum Tarihi Seçin'}
+        </Button>
+        {showDatePicker && (
+          <DateTimePicker
+            value={birthDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) setBirthDate(selectedDate);
+            }}
+          />
+        )}
         <View style={styles.menuContainer}>
           <Menu
             visible={menuVisible}
@@ -110,15 +135,15 @@ const AddPatient = () => {
                 onPress={() => setMenuVisible(true)}
                 style={styles.dropdown}
               >
-                {age || 'Yaş Seçin'}
+                {gender || 'Cinsiyet Seçin'}
               </Button>
             }
           >
-            {ageOptions.map((option, index) => (
+            {genderOptions.map((option, index) => (
               <Menu.Item
                 key={index}
                 onPress={() => {
-                  setAge(option);
+                  setGender(option);
                   setMenuVisible(false);
                 }}
                 title={option}
