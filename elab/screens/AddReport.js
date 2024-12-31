@@ -6,6 +6,12 @@ import { doc, collection, addDoc, getDoc } from 'firebase/firestore';
 
 const AddReport = () => {
   const [patientNumber, setPatientNumber] = useState('');
+  const [reportGroup, setReportGroup] = useState('');
+  const [sampleType, setSampleType] = useState('');
+  const [testRequestTime, setTestRequestTime] = useState('');
+  const [sampleCollectionTime, setSampleCollectionTime] = useState('');
+  const [sampleAcceptanceTime, setSampleAcceptanceTime] = useState('');
+  const [expertApprovalTime, setExpertApprovalTime] = useState('');
   const [IgA, setIgA] = useState('');
   const [IgM, setIgM] = useState('');
   const [IgG, setIgG] = useState('');
@@ -20,6 +26,11 @@ const AddReport = () => {
       return;
     }
 
+    if (!reportGroup || !sampleType || !testRequestTime || !sampleCollectionTime || !sampleAcceptanceTime || !expertApprovalTime) {
+      Alert.alert('Hata', 'Lütfen tüm tarih alanlarını doldurun.');
+      return;
+    }
+
     try {
       const patientDocRef = doc(firestore, 'patients', patientNumber);
       const patientDoc = await getDoc(patientDocRef);
@@ -30,6 +41,12 @@ const AddReport = () => {
       }
 
       const reportData = {
+        reportGroup,
+        sampleType,
+        testRequestTime: new Date(testRequestTime),
+        sampleCollectionTime: new Date(sampleCollectionTime),
+        sampleAcceptanceTime: new Date(sampleAcceptanceTime),
+        expertApprovalTime: new Date(expertApprovalTime),
         IgA: IgA !== '' ? parseFloat(IgA) : null,
         IgM: IgM !== '' ? parseFloat(IgM) : null,
         IgG: IgG !== '' ? parseFloat(IgG) : null,
@@ -37,7 +54,6 @@ const AddReport = () => {
         IgG2: IgG2 !== '' ? parseFloat(IgG2) : null,
         IgG3: IgG3 !== '' ? parseFloat(IgG3) : null,
         IgG4: IgG4 !== '' ? parseFloat(IgG4) : null,
-        date: new Date().toISOString(),
       };
 
       const reportsCollectionRef = collection(patientDocRef, 'reports');
@@ -45,6 +61,12 @@ const AddReport = () => {
 
       Alert.alert('Başarılı', 'Tahlil bilgisi başarıyla eklendi.');
       setPatientNumber('');
+      setReportGroup('');
+      setSampleType('');
+      setTestRequestTime('');
+      setSampleCollectionTime('');
+      setSampleAcceptanceTime('');
+      setExpertApprovalTime('');
       setIgA('');
       setIgM('');
       setIgG('');
@@ -72,13 +94,54 @@ const AddReport = () => {
         />
         <TextInput
           mode="outlined"
+          label="Rapor Grubu"
+          value={reportGroup}
+          onChangeText={setReportGroup}
+          style={styles.input}
+        />
+        <TextInput
+          mode="outlined"
+          label="Numune Türü"
+          value={sampleType}
+          onChangeText={setSampleType}
+          style={styles.input}
+        />
+        <TextInput
+          mode="outlined"
+          label="Tetkik İstem Zamanı (YYYY-MM-DD HH:mm)"
+          value={testRequestTime}
+          onChangeText={setTestRequestTime}
+          style={styles.input}
+        />
+        <TextInput
+          mode="outlined"
+          label="Numune Alma Zamanı (YYYY-MM-DD HH:mm)"
+          value={sampleCollectionTime}
+          onChangeText={setSampleCollectionTime}
+          style={styles.input}
+        />
+        <TextInput
+          mode="outlined"
+          label="Numune Kabul Zamanı (YYYY-MM-DD HH:mm)"
+          value={sampleAcceptanceTime}
+          onChangeText={setSampleAcceptanceTime}
+          style={styles.input}
+        />
+        <TextInput
+          mode="outlined"
+          label="Uzman Onay Zamanı (YYYY-MM-DD HH:mm)"
+          value={expertApprovalTime}
+          onChangeText={setExpertApprovalTime}
+          style={styles.input}
+        />
+        {/* Tahlil Giriş Alanları */}
+        <TextInput
+          mode="outlined"
           label="IgA"
           value={IgA}
           onChangeText={setIgA}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgA değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <TextInput
           mode="outlined"
@@ -87,8 +150,6 @@ const AddReport = () => {
           onChangeText={setIgM}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgM değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <TextInput
           mode="outlined"
@@ -97,8 +158,6 @@ const AddReport = () => {
           onChangeText={setIgG}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgG değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <TextInput
           mode="outlined"
@@ -107,8 +166,6 @@ const AddReport = () => {
           onChangeText={setIgG1}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgG1 değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <TextInput
           mode="outlined"
@@ -117,8 +174,6 @@ const AddReport = () => {
           onChangeText={setIgG2}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgG2 değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <TextInput
           mode="outlined"
@@ -127,8 +182,6 @@ const AddReport = () => {
           onChangeText={setIgG3}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgG3 değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <TextInput
           mode="outlined"
@@ -137,8 +190,6 @@ const AddReport = () => {
           onChangeText={setIgG4}
           style={styles.input}
           keyboardType="numeric"
-          placeholder="IgG4 değeri"
-          theme={{ colors: { placeholder: '#B71C1C', primary: '#B71C1C' } }}
         />
         <Button
           mode="contained"
