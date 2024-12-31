@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'; 
 import { View, StyleSheet, Alert } from 'react-native';
 import { Text, TextInput, Button, Avatar } from 'react-native-paper';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, firestore } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  // Sabit admin bilgileri
-  const ADMIN_EMAIL = 'b201210045@gmail.com';
-  const ADMIN_PASSWORD = '123456789';
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -19,34 +15,58 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    // Admin giriş kontrolü
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      Alert.alert('Başarılı', 'Admin olarak giriş yapıldı!');
-      navigation.navigate('AdminPanelNavigator'); // Admin paneline yönlendirme
-      return;
-    }
-
     try {
-      // Firebase Authentication ile normal kullanıcı girişini kontrol et
+      // Firebase Authentication ile giriş
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log('Giriş Başarılı:', user.email);
 
-      // Firestore'dan kullanıcı bilgilerini al
-      const userDoc = await getDoc(doc(firestore, 'users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
+      // Admin kontrolü
+      const adminQuery = query(
+        collection(firestore, 'admins'),
+        where('email', '==', email)
+      );
+      const adminSnapshot = await getDocs(adminQuery);
 
+      if (!adminSnapshot.empty) {
+        console.log('Admin Girişi Başarılı:', adminSnapshot.docs[0].data());
+        Alert.alert('Başarılı', 'Admin olarak giriş yapıldı!');
+        navigation.navigate('AdminPanelNavigator'); // Admin Paneline Yönlendirme
+        return;
+      }
+
+      // Kullanıcı kontrolü
+      const userQuery = query(
+        collection(firestore, 'users'),
+        where('email', '==', email)
+      );
+      const userSnapshot = await getDocs(userQuery);
+
+      if (!userSnapshot.empty) {
+        const userData = userSnapshot.docs[0].data();
+        console.log('Kullanıcı Verisi:', userData);
         if (userData.role === 'user') {
           Alert.alert('Başarılı', 'Kullanıcı olarak giriş yapıldı!');
-          navigation.navigate('UserPanelNavigator'); // Kullanıcı paneline yönlendirme
+          navigation.navigate('UserPanelNavigator'); // Kullanıcı Paneline Yönlendirme
         } else {
           Alert.alert('Hata', 'Kullanıcı rolü tanımlanamıyor.');
         }
-      } else {
-        Alert.alert('Hata', 'Kullanıcı bilgileri bulunamadı.');
+        return;
       }
+
+      // Eğer kullanıcı bulunamazsa
+      Alert.alert('Hata', 'Kullanıcı bilgileri bulunamadı.');
     } catch (error) {
-      Alert.alert('Hata', 'E-posta veya şifre yanlış.');
+      console.error('Hata:', error.code, error.message);
+      if (error.code === 'auth/user-not-found') {
+        Alert.alert('Hata', 'Bu e-posta ile kayıtlı kullanıcı bulunamadı.');
+      } else if (error.code === 'auth/wrong-password') {
+        Alert.alert('Hata', 'Yanlış şifre girdiniz.');
+      } else if (error.code === 'auth/invalid-credential') {
+        Alert.alert('Hata', 'Geçersiz giriş kimlik bilgisi. Lütfen tekrar deneyin.');
+      } else {
+        Alert.alert('Hata', 'Giriş sırasında bir sorun oluştu.');
+      }
     }
   };
 
@@ -64,7 +84,6 @@ const Login = ({ navigation }) => {
         placeholder="example@gmail.com"
         autoCapitalize="none"
         theme={{
-          fonts: { regular: { fontFamily: 'fantasy' } },
           colors: { placeholder: '#B71C1C', primary: '#B71C1C' },
         }}
       />
@@ -77,7 +96,6 @@ const Login = ({ navigation }) => {
         secureTextEntry
         placeholder="********"
         theme={{
-          fonts: { regular: { fontFamily: 'fantasy' } },
           colors: { placeholder: '#B71C1C', primary: '#B71C1C' },
         }}
       />
